@@ -1,7 +1,7 @@
 from flask import Flask, request
 import os
 import requests
-from config import API_URL
+from config import API_URL, BOT_USERNAME
 from word_handler import get_random_word
 from check_typing import handle_typing_session, check_typing
 from leaderboard_handler import handle_leaderboard
@@ -19,7 +19,6 @@ def webhook():
     if not data:
         return "no data"
 
-    # Handle message or callback_query
     if "message" in data:
         message = data['message']
         chat_id = message['chat']['id']
@@ -27,7 +26,9 @@ def webhook():
         user_name = message['from'].get('username') or message['from'].get('first_name', 'User')
         text = message.get('text', '')
 
-        # Command handling
+        is_reply_to_bot = message.get('reply_to_message', {}).get('from', {}).get('username') == BOT_USERNAME
+        is_mentioned = f"@{BOT_USERNAME}" in text
+
         if text == '/start':
             send_message(chat_id, "Welcome to Typing Speed Bot! Choose difficulty:", reply_markup=get_category_buttons())
         elif text == '/leaderboard':
@@ -36,7 +37,7 @@ def webhook():
             handle_admin_command(user_id, chat_id, text)
         elif text.lower() in ['easy', 'medium', 'hard']:
             handle_typing_session(chat_id, user_id, text.lower())
-        else:
+        elif is_reply_to_bot or is_mentioned:
             check_typing(chat_id, user_id, text, user_name)
 
     elif "callback_query" in data:
