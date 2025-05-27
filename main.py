@@ -3,10 +3,9 @@ import os
 import requests
 from config import API_URL
 from word_handler import get_random_word
-from session_handler import handle_typing_session, check_typing
+from check_typing import handle_typing_session, check_typing
 from leaderboard_handler import handle_leaderboard
 from admin import handle_admin_command
-from check_typing import handle_typing_session, check_typing
 
 app = Flask(__name__)
 
